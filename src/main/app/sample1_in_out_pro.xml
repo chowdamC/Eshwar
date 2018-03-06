@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cluster="http://www.mulesoft.org/schema/mule/ee/cluster" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="8081" doc:name="HTTP Listener Configuration"/>
+    <http:request-config name="HTTP_Request_Configuration" host="United_REST_Request_Configuration" port="80" basePath="/essentials/united/flights" doc:name="HTTP Request Configuration"/>
+    <http:request-config name="HTTP_Request_Configuration1" host="ilt.mulesoft-training.com" port="80" basePath="/essentials/united/flights/" doc:name="HTTP Request Configuration"/>
+    <configuration doc:name="Configuration">
+        <http:config useTransportForUris="false"/>
+    </configuration>
+    <flow name="sample1_in_out_proFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/sample" allowedMethods="GET" doc:name="HTTP"/>
+        <set-property propertyName="qpname" value="#[message.inboundProperties.'http.query.params'.qpname]" doc:name="Property"/>
+        <set-session-variable variableName="qpname" value="#[message.outboundProperties.qpname]" doc:name="Session Variable"/>
+        <set-variable variableName="age" value="#[message.inboundProperties.'http.query.params'.age]" doc:name="Variable"/>
+        <set-payload value="QPNAME: #[message.outboundProperties.qpname] + Age : #[flowVars.age]" doc:name="Set Payload"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="sample1_in_out_proFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/united" allowedMethods="GET" doc:name="HTTP"/>
+        <http:request config-ref="HTTP_Request_Configuration1" path="/" method="GET" doc:name="United REST Request"/>
+    </flow>
+</mule>
